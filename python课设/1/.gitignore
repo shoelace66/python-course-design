@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+data/musicscope.db
+data/musicscope.db-shm
+data/musicscope.db-wal
+data/uploads/*
+!data/uploads/.gitkeep
+data/exports/*
+!data/exports/.gitkeep
+

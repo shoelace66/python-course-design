@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <title>MusicScope · 音乐特征分析器</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <a class="brand" href="#" data-page-link="overview" aria-label="MusicScope 首页">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span><strong>MusicScope</strong><small>音乐特征分析器</small></span>
+      </a>
+      <nav class="side-nav">
+        <button class="nav-item active" data-page="overview"><span>⌂</span>概览</button>
+        <button class="nav-item" data-page="analyze"><span>◉</span>音乐分析</button>
+        <button class="nav-item" data-page="history"><span>≡</span>分析记录</button>
+        <button class="nav-item" data-page="data"><span>⇄</span>数据管理</button>
+        <button class="nav-item" data-page="about"><span>?</span>原理与帮助</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="system-dot"><i></i><span>本地服务运行中</span></div>
+        <p>数据只保存在本机<br>MusicScope v1.0.0</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" aria-label="打开导航">☰</button>
+        <div><p class="eyebrow">PYTHON 课程设计</p><h1 id="pageTitle">数据概览</h1></div>
+        <div class="topbar-actions"><span class="privacy-badge"><i></i>本地离线分析</span><button class="primary compact" data-go-analyze>＋ 分析音乐</button></div>
+      </header>
+
+      <section class="page active" id="page-overview">
+        <div class="hero-panel">
+          <div class="hero-copy">
+            <span class="hero-kicker">AUDIO INTELLIGENCE · LOCAL FIRST</span>
+            <h2>让每一段声音，<br><em>变成可读的数据。</em></h2>
+            <p>上传 PCM WAV，快速提取节奏、音调、音量与频谱特征，并得到可解释的听感倾向分类。</p>
+            <div class="hero-actions"><button class="primary" data-go-analyze>开始分析 <span>→</span></button><button class="ghost" id="overviewDemo">生成演示音频</button></div>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="vinyl"><div class="vinyl-rings"></div><div class="vinyl-label"><span>MS</span></div></div>
+            <div class="floating-metric metric-tempo"><small>TEMPO</small><b>120</b><span>BPM</span></div>
+            <div class="floating-metric metric-key"><small>KEY</small><b>C</b><span>MAJOR</span></div>
+            <div class="sound-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+        <div class="section-heading"><div><span class="section-index">01</span><h3>分析数据概览</h3></div><p id="lastUpdated">等待第一次分析</p></div>
+        <div class="stats-grid">
+          <article class="stat-card accent-cyan"><div class="stat-icon">♫</div><span>累计分析</span><strong id="statCount">0</strong><small>首音乐</small></article>
+          <article class="stat-card accent-violet"><div class="stat-icon">◷</div><span>音频总时长</span><strong id="statDuration">0:00</strong><small>分 : 秒</small></article>
+          <article class="stat-card accent-orange"><div class="stat-icon">⚡</div><span>平均节奏</span><strong id="statTempo">—</strong><small>BPM</small></article>
+          <article class="stat-card accent-pink"><div class="stat-icon">◒</div><span>平均响度</span><strong id="statRms">—</strong><small>dBFS</small></article>
+        </div>
+        <div class="overview-grid">
+          <article class="panel category-panel"><div class="panel-title"><div><small>CLASSIFICATION</small><h3>听感倾向分布</h3></div><span class="live-pill">实时</span></div><div id="categoryChart" class="category-chart empty-chart"><div class="empty-inline"><span>◎</span><p>完成分析后，这里会显示分类分布</p></div></div></article>
+          <article class="panel recent-panel"><div class="panel-title"><div><small>RECENT</small><h3>最近分析</h3></div><button class="text-button" data-page="history">查看全部 →</button></div><div id="recentList" class="recent-list"><div class="empty-inline"><span>♩</span><p>还没有分析记录</p></div></div></article>
+        </div>
+      </section>
+
+      <section class="page" id="page-analyze">
+        <div class="analyze-layout">
+          <article class="panel upload-panel">
+            <div class="panel-title"><div><small>INPUT AUDIO</small><h3>导入音乐文件</h3></div><span class="format-pill">PCM WAV</span></div>
+            <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="选择或拖入 WAV 音频">
+              <input type="file" id="audioInput" accept=".wav,audio/wav" hidden>
+              <div class="upload-orbit"><span>♫</span></div><h4>把 WAV 音频拖到这里</h4><p>或点击选择本地文件 · 最大 80 MB</p><button class="ghost compact" type="button">选择 WAV 文件</button>
+            </div>
+            <div class="selected-file hidden" id="selectedFile"><div class="file-icon">WAV</div><div><strong id="selectedName"></strong><span id="selectedMeta"></span></div><button id="clearFile" aria-label="清除选择">×</button></div>
+            <div class="upload-actions"><button class="primary wide" id="analyzeButton" disabled><span>◉</span> 开始提取音乐特征</button><button class="ghost" id="demoButton">没有音频？生成演示</button></div>
+            <p class="format-note"><span>i</span> 为保证零依赖离线运行，当前稳定支持 8/16/24/32 位 PCM WAV。MP3、M4A 可先转换为 WAV。</p>
+          </article>
+          <aside class="analysis-guide">
+            <p class="eyebrow">ANALYSIS PIPELINE</p><h3>一次分析，读懂四个维度</h3>
+            <ol><li><b>01</b><div><strong>声音预处理</strong><span>解码、声道混合、抗混叠降采样</span></div></li><li><b>02</b><div><strong>特征提取</strong><span>节奏、基频、响度与频谱</span></div></li><li><b>03</b><div><strong>可解释分类</strong><span>速度、能量、明亮度规则融合</span></div></li><li><b>04</b><div><strong>持久化保存</strong><span>指标与曲线写入 SQLite</span></div></li></ol>
+          </aside>
+        </div>
+        <div class="progress-panel hidden" id="progressPanel"><div class="progress-top"><span id="progressStage">正在读取音频…</span><b id="progressPercent">8%</b></div><div class="progress-track"><i id="progressBar"></i></div><p>纯本地计算，音频不会上传到互联网。</p></div>
+        <div class="results hidden" id="analysisResults">
+          <div class="section-heading result-heading"><div><span class="section-index">02</span><h3>特征分析结果</h3></div><div class="result-file"><span>当前音频</span><strong id="resultFileName">—</strong></div></div>
+          <div class="result-primary-grid">
+            <article class="metric-card tempo-card"><span class="metric-label">节奏速度</span><div><strong id="resultTempo">—</strong><small>BPM</small></div><p id="tempoHint">短时能量 + 自相关</p><div class="confidence-line"><i id="tempoConfidence"></i></div></article>
+            <article class="metric-card key-card"><span class="metric-label">调性 / 主导音高</span><div><strong id="resultKey">—</strong></div><p><span id="resultPitch">—</span> · Chroma 模板匹配</p><div class="confidence-line"><i id="keyConfidence"></i></div></article>
+            <article class="metric-card volume-card"><span class="metric-label">平均音量</span><div><strong id="resultRms">—</strong><small>dBFS</small></div><p>峰值 <span id="resultPeak">—</span> · 动态 <span id="resultDynamic">—</span></p><div class="volume-meter"><i id="volumeMeter"></i></div></article>
+            <article class="metric-card class-card"><span class="metric-label">听感倾向</span><div><strong id="resultClass">—</strong></div><p id="resultReasons">规则融合分类</p><span class="confidence-badge" id="classConfidence">—</span></article>
+          </div>
+          <div class="secondary-metrics" id="secondaryMetrics"></div>
+          <div class="player-row hidden" id="playerRow"><span class="player-icon">▶</span><div><strong>试听原音频</strong><small>确认分析素材</small></div><audio id="audioPlayer" controls preload="metadata"></audio></div>
+          <div class="charts-grid">
+            <article class="panel chart-panel wide-chart"><div class="panel-title"><div><small>AMPLITUDE / TIME</small><h3>音频波形</h3></div><span class="chart-legend"><i class="cyan-dot"></i>振幅范围</span></div><div class="canvas-wrap"><canvas id="waveformCanvas"></canvas></div></article>
+            <article class="panel chart-panel"><div class="panel-title"><div><small>ENERGY ENVELOPE</small><h3>音量能量曲线</h3></div><span class="chart-legend"><i class="orange-dot"></i>RMS</span></div><div class="canvas-wrap small"><canvas id="energyCanvas"></canvas></div></article>
+            <article class="panel chart-panel"><div class="panel-title"><div><small>FREQUENCY</small><h3>平均频谱</h3></div><span class="chart-legend"><i class="violet-dot"></i>相对能量</span></div><div class="canvas-wrap small"><canvas id="spectrumCanvas"></canvas></div></article>
+            <article class="panel chart-panel wide-chart"><div class="panel-title"><div><small>CHROMA 12-TONE</small><h3>十二音级能量</h3></div><span class="chart-legend"><i class="pink-dot"></i>Pitch Class</span></div><div class="canvas-wrap small"><canvas id="chromaCanvas"></canvas></div></article>
+          </div>
+          <div class="method-note"><span>!</span><p><strong>结果说明：</strong>基频与调性是对复杂音乐的统计估计；“听感倾向”是可解释的规则分类，不等同于专业流派标签。</p></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-history">
+        <div class="section-heading page-intro"><div><span class="section-index">03</span><h3>分析记录</h3></div><p>所有分析指标和可视化序列均持久化到 SQLite</p></div>
+        <article class="panel table-panel">
+          <div class="table-toolbar"><label class="search-box"><span>⌕</span><input id="historySearch" type="search" placeholder="搜索文件名…"></label><select id="historyFilter" aria-label="按分类筛选"><option value="">全部听感分类</option></select><button class="ghost compact" id="refreshHistory">↻ 刷新</button></div>
+          <div class="table-scroll"><table><thead><tr><th>音乐文件</th><th>分析时间</th><th>时长</th><th>BPM</th><th>调性</th><th>响度</th><th>听感倾向</th><th>操作</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+          <div class="table-empty hidden" id="historyEmpty"><span>♬</span><h4>没有匹配的分析记录</h4><p>去分析一段 WAV 音频吧</p><button class="primary compact" data-go-analyze>立即分析</button></div>
+          <div class="table-footer"><span id="historyCount">共 0 条记录</span><span>点击“查看”可恢复完整图表</span></div>
+        </article>
+      </section>
+
+      <section class="page" id="page-data">
+        <div class="section-heading page-intro"><div><span class="section-index">04</span><h3>数据管理</h3></div><p>支持将数据库内容保存为文件，或从文件恢复到数据库</p></div>
+        <div class="data-grid">
+          <article class="data-card export-json"><div class="data-card-icon">{ }</div><small>完整可恢复</small><h3>导出 JSON</h3><p>包含全部指标、分类说明和图表序列，可完整导回系统。</p><button class="primary" id="exportJson">下载完整数据 <span>↓</span></button></article>
+          <article class="data-card export-csv"><div class="data-card-icon">▦</div><small>Excel 友好</small><h3>导出 CSV</h3><p>UTF-8 BOM 中文摘要表，适合统计、打印与二次处理。</p><button class="primary violet" id="exportCsv">下载数据摘要 <span>↓</span></button></article>
+          <article class="data-card backup-db"><div class="data-card-icon">◉</div><small>原生 SQLite</small><h3>备份数据库</h3><p>通过 SQLite 在线备份接口生成一致的 .db 数据库副本。</p><button class="primary orange" id="backupDb">下载数据库备份 <span>↓</span></button></article>
+        </div>
+        <article class="panel import-panel"><div class="import-copy"><span class="section-index">IN</span><div><small>IMPORT DATA</small><h3>从 JSON / CSV 导入数据库</h3><p>支持本系统导出的文件。重复记录会按文件指纹与原分析时间自动跳过。</p></div></div><div class="import-actions"><input type="file" id="importInput" accept=".json,.csv,application/json,text/csv" hidden><button class="ghost" id="importButton">选择数据文件</button></div></article>
+        <article class="panel storage-panel"><div class="panel-title"><div><small>DATABASE STATUS</small><h3>本地存储说明</h3></div><span class="live-pill">SQLite 3</span></div><div class="storage-facts"><div><span>数据库位置</span><code>data/musicscope.db</code></div><div><span>音频文件</span><code>data/uploads/</code></div><div><span>导出备份</span><code>data/exports/</code></div><div><span>关系模型</span><code>tracks → analyses → features / classifications</code></div></div></article>
+      </section>
+
+      <section class="page" id="page-about">
+        <div class="section-heading page-intro"><div><span class="section-index">05</span><h3>算法原理与帮助</h3></div><p>答辩时可以直接打开本页讲解系统设计</p></div>
+        <div class="about-hero"><div><p class="eyebrow">ABOUT THE PROJECT</p><h2>用透明算法<br>理解音乐信号</h2><p>MusicScope 采用 Python 标准库从零实现音频特征分析。不依赖云服务，所有算法均可在源代码中追溯。</p></div><div class="code-card"><span>analysis_pipeline.py</span><pre><code>WAV → PCM samples · frame + Hann window · FFT / autocorrelation · feature fusion · SQLite transaction</code></pre></div></div>
+        <div class="algorithm-grid">
+          <article><b>01</b><span>RHYTHM</span><h3>节奏 BPM</h3><p>计算短时 RMS 能量，对能量上升沿构造起音包络，再用自相关寻找最稳定的周期，换算每分钟节拍数。</p><code>BPM = 60 × frame_rate / lag</code></article>
+          <article><b>02</b><span>PITCH</span><h3>音高与音名</h3><p>在有效声音帧上计算归一化自相关，以最佳延迟估计基频，再用十二平均律把 Hz 转换为音名。</p><code>MIDI = 69 + 12 log₂(f / 440)</code></article>
+          <article><b>03</b><span>VOLUME</span><h3>响度 dBFS</h3><p>由原始采样直接计算 RMS 与峰值，不做整体归一化，因此能够保留不同文件之间真实的音量差异。</p><code>dBFS = 20 log₁₀(RMS)</code></article>
+          <article><b>04</b><span>TIMBRE</span><h3>频谱与调性</h3><p>Hann 窗配合 1024 点 FFT 得到频谱；聚合十二音级能量，并与大小调模板做相关匹配。</p><code>Chroma + key profile correlation</code></article>
+          <article><b>05</b><span>CLASSIFY</span><h3>听感分类</h3><p>融合 BPM、dBFS、频谱重心和动态范围，输出可解释的规则标签与匹配度，不伪装成机器学习概率。</p><code>fast + loud → 激情动感</code></article>
+          <article><b>06</b><span>DATABASE</span><h3>数据库持久化</h3><p>轨道、分析、特征和分类使用外键关联；一条分析在同一事务内完成，删除时级联清理关联数据。</p><code>SQLite + FK + transaction</code></article>
+        </div>
+        <article class="panel faq-panel"><h3>使用步骤</h3><ol><li>双击项目根目录的“一键启动.bat”。</li><li>在“音乐分析”中选择 PCM WAV，或点击生成演示音频。</li><li>等待本地算法完成，查看指标、波形、频谱与十二音级图。</li><li>在“分析记录”恢复历史结果，在“数据管理”导出或导入数据库内容。</li></ol></article>
+      </section>
+    </main>
+  </div>
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <dialog id="confirmDialog" class="confirm-dialog"><form method="dialog"><div class="dialog-icon">!</div><h3>删除分析记录？</h3><p id="confirmText">此操作将同时删除数据库记录和保存的本地音频，无法撤销。</p><div><button value="cancel" class="ghost">取消</button><button value="confirm" class="danger">确认删除</button></div></form></dialog>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

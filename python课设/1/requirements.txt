@@ -1,0 +1,3 @@
+# MusicScope 1.0 仅使用 Python 标准库，无需安装第三方依赖。
+# 建议 Python 3.10 或更高版本；已在 Python 3.14.5 / Windows 11 验证。
+
